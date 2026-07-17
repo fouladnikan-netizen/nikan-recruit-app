@@ -722,7 +722,7 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
                     ref={voiceInputRef}
                     type="file"
                     accept="audio/*"
-                    capture="microphone"
+                    capture={"microphone" as any}
                     className="hidden"
                     onChange={(e) => {
                       setVoiceSelected(Boolean(e.target.files?.[0]));

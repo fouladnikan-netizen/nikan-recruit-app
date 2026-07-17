@@ -5,6 +5,8 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
+# این خط حیاتی است: پوشه prisma را هم کپی کنید
+COPY prisma ./prisma/
 RUN npm install
 
 # ساخت پروژه
