@@ -244,12 +244,24 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [logoError, setLogoError] = useState(false);
+  const [heroImageError, setHeroImageError] = useState(false);
   const [interviewSlot, setInterviewSlot] = useState("");
   const [mood, setMood] = useState("");
   const [reverseQuestion, setReverseQuestion] = useState("");
   const [voiceSelected, setVoiceSelected] = useState(false);
   const [activeMicField, setActiveMicField] = useState<string | null>(null);
   const voiceInputRef = useRef<HTMLInputElement>(null);
+  const landingScrollRef = useRef<HTMLDivElement>(null);
+  const formScrollRef = useRef<HTMLDivElement>(null);
+
+  const goToForm = () => {
+    setView("form");
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0 });
+      landingScrollRef.current?.scrollTo({ top: 0 });
+      formScrollRef.current?.scrollTo({ top: 0 });
+    });
+  };
 
   useEffect(() => {
     const days = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه"];
@@ -326,15 +338,25 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
         {view !== "success" && (
           <header className="z-40 flex shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/90 p-4 shadow-sm backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
                 {logoError ? (
-                  <span className="text-xl font-bold text-slate-900">N</span>
+                  <span className="flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-red-500 text-base font-black text-white">
+                    N
+                  </span>
                 ) : (
                   <img
-                    src="/nikan2.jpg"
-                    alt="Nikan"
-                    className="h-full w-full object-cover"
-                    onError={() => setLogoError(true)}
+                    key="nikan6.png"
+                    src="/nikan6.png?v=2"
+                    alt="لوگو پترو فولاد نیکان"
+                    className="h-full w-full object-contain"
+                    onError={(e) => {
+                      console.error("[Image Load Error] Logo failed:", {
+                        requestedPath: "/nikan6.png",
+                        absoluteUrl: e.currentTarget.src,
+                        hint: "Ensure public/nikan6.png exists; hard-refresh if you replaced the file",
+                      });
+                      setLogoError(true);
+                    }}
                   />
                 )}
               </div>
@@ -343,7 +365,7 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
                   پترو فولاد نیکان
                 </span>
                 <span className="mt-0.5 text-[10px] font-bold text-slate-500">
-                  اکوسیستم نوین بازرگانی
+                  تامین کننده مقاطع فولادی
                 </span>
               </div>
             </div>
@@ -365,14 +387,38 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
         )}
 
         {view === "landing" && (
-          <>
-            <div className="flex-1 overflow-y-auto overscroll-contain pb-4">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div
+              ref={landingScrollRef}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            >
               <div className="px-4 pt-4">
-                <img
-                  src="/dsc_6502.jpg"
-                  alt="تیم شرکت"
-                  className="mb-4 h-48 w-full rounded-2xl object-cover shadow-sm"
-                />
+                {heroImageError ? (
+                  <div
+                    className="mb-4 flex h-48 w-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-slate-50 to-red-50 shadow-sm"
+                    role="img"
+                    aria-label="تیم پترو فولاد نیکان"
+                  >
+                    <span className="mb-2 text-4xl">👥</span>
+                    <span className="text-sm font-bold text-slate-600">
+                      تیم پترو فولاد نیکان
+                    </span>
+                  </div>
+                ) : (
+                  <img
+                    src="/dsc_6502.jpg"
+                    alt="تیم پترو فولاد نیکان"
+                    className="mb-4 h-48 w-full rounded-2xl object-cover shadow-sm border border-slate-200"
+                    onError={(e) => {
+                      console.error("[Image Load Error] Hero image failed:", {
+                        requestedPath: "/dsc_6502.jpg",
+                        absoluteUrl: e.currentTarget.src,
+                        hint: "Ensure public/dsc_6502.jpg exists and restart dev server if newly added",
+                      });
+                      setHeroImageError(true);
+                    }}
+                  />
+                )}
               </div>
               <div className="px-6 pb-6 pt-2 bg-white/80 backdrop-blur-sm">
                 <div className="mb-4 inline-flex items-center rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-bold text-red-600">
@@ -449,22 +495,25 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="shrink-0 border-t border-slate-200 bg-white/90 p-4 backdrop-blur-md">
-              <p className="mb-3 text-center text-[12px] font-bold text-red-600">
-                هدف ما همکاری بلندمدت است؛ این کارآموزی صرفاً مرحله‌ای برای
-                آشنایی با صنعت و روش کار ماست.
-              </p>
-              <button
-                type="button"
-                onClick={() => setView("form")}
-                className="h-12 w-full touch-manipulation rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-8 font-bold text-white shadow-[0_4px_15px_rgba(220,38,38,0.4)] transition-all hover:from-red-700"
-              >
-                شرایط را خواندم و موافقم
-              </button>
+              <div className="sticky bottom-0 z-30 mt-2 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-md">
+                <p className="mb-3 text-center text-[12px] font-bold text-red-600">
+                  هدف ما همکاری بلندمدت است؛ این کارآموزی صرفاً مرحله‌ای برای
+                  آشنایی با صنعت و روش کار ماست.
+                </p>
+                <button
+                  type="button"
+                  onPointerUp={(e) => {
+                    e.preventDefault();
+                    goToForm();
+                  }}
+                  className="h-12 w-full cursor-pointer touch-manipulation rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-8 font-bold text-white shadow-[0_4px_15px_rgba(220,38,38,0.4)] transition-all hover:from-red-700 active:scale-[0.98]"
+                >
+                  شرایط را خواندم و موافقم
+                </button>
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {view === "form" && (
@@ -473,7 +522,10 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
             noValidate
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 pb-4 pt-4">
+            <div
+              ref={formScrollRef}
+              className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 pb-4 pt-4"
+            >
               <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                 <h3 className="mb-4 text-sm font-bold text-slate-800">
                   اول یکم با هم آشنا شیم
