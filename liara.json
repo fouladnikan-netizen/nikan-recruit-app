@@ -1,6 +1,4 @@
 {
-  "platform": "next",
-  "build": {
-    "command": "npm install && npm run build"
-  }
+  "app": "nikan-recruit-app",
+  "platform": "docker"
 }
