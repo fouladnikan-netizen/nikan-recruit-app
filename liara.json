@@ -1,7 +1,6 @@
 {
+  "platform": "next",
   "build": {
-    "args": {
-      "NODE_ENV": "production"
-    }
+    "command": "npm install && npm run build"
   }
 }
