@@ -1,4 +1,5 @@
 {
+  "platform": "docker",
   "app": "nikan-recruit-app",
-  "platform": "docker"
+  "port": 3000
 }
