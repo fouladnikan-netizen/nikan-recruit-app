@@ -1,32 +1,25 @@
-# استفاده از نسخه سبک Node.js
+# مرحله 1: Base
 FROM node:20-alpine AS base
-
-# نصب پکیج‌ها
-FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
-# این خط حیاتی است: پوشه prisma را هم کپی کنید
-COPY prisma ./prisma/
 RUN npm install
 
-# ساخت پروژه
+# مرحله 2: Builder
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# اینجا مطمئن می‌شویم prisma در کانتینرِ بیلد وجود دارد
+RUN npx prisma generate --schema=prisma/schema.prisma
 RUN npm run build
 
-# مرحله اجرا (نهایی)
-FROM base AS runner
+# مرحله 3: Runner
+FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
+# کپی کردنِ نتیجه بیلد و فایل‌های مورد نیاز
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./next.config.ts
 
-EXPOSE 3000
 CMD ["npm", "start"]
