@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  CapacityFullError,
+  findAvailableInterviewSlot,
+} from "@/lib/interview";
 
 export async function POST(request: Request) {
   if (!process.env.DATABASE_URL) {
@@ -22,6 +26,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const slot = await findAvailableInterviewSlot();
+
     const candidate = await prisma.candidate.create({
       data: {
         fullname: body.fullname,
@@ -34,12 +40,39 @@ export async function POST(request: Request) {
         ai_skill: body.ai_skill,
         motivation: body.motivation,
         expectations: body.expectations,
+        interview: {
+          create: {
+            date: slot.date,
+            timeSlot: slot.timeSlot,
+          },
+        },
+      },
+      include: {
+        interview: true,
       },
     });
 
-    return NextResponse.json({ success: true, candidate }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        candidate,
+        interview: {
+          date: slot.date,
+          timeSlot: slot.timeSlot,
+          label: slot.label,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Database Error:", error);
+
+    if (error instanceof CapacityFullError) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      );
+    }
 
     if (error instanceof Prisma.PrismaClientInitializationError) {
       return NextResponse.json(
@@ -55,7 +88,8 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "جدول دیتابیس هنوز ساخته نشده. لطفاً با پشتیبانی تماس بگیرید.",
+          message:
+            "جدول دیتابیس هنوز ساخته نشده. لطفاً با پشتیبانی تماس بگیرید.",
         },
         { status: 503 }
       );

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Candidate {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   fullname     String
   phone        String
   area         String
@@ -19,6 +19,18 @@ model Candidate {
   ai_skill     String
   motivation   String
   expectations String
-  status       String   @default("رزومه دریافت شد")
-  createdAt    DateTime @default(now())
+  status       String     @default("رزومه دریافت شد")
+  createdAt    DateTime   @default(now())
+  interview    Interview?
+}
+
+model Interview {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  timeSlot    String
+  candidateId String   @unique
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([date, timeSlot])
 }

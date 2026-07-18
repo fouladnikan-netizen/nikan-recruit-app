@@ -137,7 +137,12 @@ function SpeechMicButton({
   const baseTextRef = useRef(value);
 
   useEffect(() => {
-    setSupported(Boolean(createSpeechRecognition()));
+    setSupported(
+      Boolean(createSpeechRecognition()) &&
+        (typeof window === "undefined" ||
+          window.isSecureContext ||
+          window.location.hostname === "localhost")
+    );
   }, []);
 
   useEffect(() => {
@@ -263,14 +268,6 @@ export default function Home() {
     });
   };
 
-  useEffect(() => {
-    const days = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه"];
-    const times = ["۱۴:۰۰", "۱۵:۳۰", "۱۶:۱۵", "۱۷:۰۰"];
-    const randomDay = days[Math.floor(Math.random() * days.length)];
-    const randomTime = times[Math.floor(Math.random() * times.length)];
-    setInterviewSlot(`${randomDay} آینده، ساعت ${randomTime}`);
-  }, []);
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -316,6 +313,10 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
       });
 
       if (response.ok) {
+        const data = await response.json().catch(() => null);
+        if (data?.interview?.label) {
+          setInterviewSlot(data.interview.label);
+        }
         setView("success");
         return;
       }
@@ -332,7 +333,7 @@ ${voiceSelected ? "وویس: فایل صدا انتخاب شد (آپلود نش�
   return (
     <div
       className="flex min-h-dvh justify-center bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-200 via-gray-100 to-slate-300 text-slate-900 sm:p-6"
-      style={{ fontFamily: "Vazirmatn, sans-serif" }}
+      style={{ fontFamily: "Mim, Vazirmatn, sans-serif" }}
     >
       <div className="flex h-dvh w-full max-w-[420px] flex-col overflow-hidden bg-white/70 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:h-[850px] sm:rounded-[2.5rem] sm:border-[8px] sm:border-slate-900">
         {view !== "success" && (
