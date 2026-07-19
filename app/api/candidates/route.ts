@@ -52,6 +52,28 @@ export async function POST(request: Request) {
       },
     });
 
+    try {
+      const message = `کارجوی جدید:
+نام: ${candidate.fullname}
+تلفن: ${candidate.phone}
+تخصص: ${candidate.field}
+مصاحبه: ${slot.label}`;
+
+      await fetch(
+        `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: process.env.TELEGRAM_CHAT_ID,
+            text: message,
+          }),
+        }
+      );
+    } catch (error) {
+      console.error("خطا در ارسال به تلگرام:", error);
+    }
+
     return NextResponse.json(
       {
         success: true,

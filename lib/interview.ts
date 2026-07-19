@@ -3,16 +3,6 @@ import { prisma } from "@/lib/prisma";
 /** Time slots offered for interviews (24h format stored in DB). */
 export const INTERVIEW_TIME_SLOTS = ["14:00", "15:30", "16:15", "17:00"] as const;
 
-const PERSIAN_WEEKDAYS = [
-  "یکشنبه",
-  "دوشنبه",
-  "سه‌شنبه",
-  "چهارشنبه",
-  "پنج‌شنبه",
-  "جمعه",
-  "شنبه",
-] as const;
-
 export class CapacityFullError extends Error {
   constructor(message = "ظرفیت تکمیل شده") {
     super(message);
@@ -55,9 +45,13 @@ function toPersianDigits(input: string): string {
 }
 
 export function formatInterviewLabel(date: Date, timeSlot: string): string {
-  const weekday = PERSIAN_WEEKDAYS[date.getDay()];
+  const formattedDate = date.toLocaleDateString("fa-IR-u-nu-latn", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
   const timeFa = toPersianDigits(timeSlot);
-  return `${weekday} آینده، ساعت ${timeFa}`;
+  return `${formattedDate}، ساعت ${timeFa}`;
 }
 
 export type ReservedSlot = {
