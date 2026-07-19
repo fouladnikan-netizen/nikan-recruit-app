@@ -56,22 +56,22 @@ export async function POST(request: Request) {
       const message = `کارجوی جدید:
 نام: ${candidate.fullname}
 تلفن: ${candidate.phone}
-تخصص: ${candidate.field}
-مصاحبه: ${slot.label}`;
+رشته: ${candidate.field}
+زمان مصاحبه: ${slot.label}`;
 
-      await fetch(
-        `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: process.env.TELEGRAM_CHAT_ID,
-            text: message,
-          }),
-        }
-      );
+      // آدرسِ بات‌فادرِ بله
+      const BALE_URL = `https://tapi.bale.ai/bot${process.env.BALE_TOKEN}/sendMessage`;
+
+      await fetch(BALE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: process.env.BALE_CHAT_ID,
+          text: message,
+        }),
+      });
     } catch (error) {
-      console.error("خطا در ارسال به تلگرام:", error);
+      console.error("خطا در ارسال به بله:", error);
     }
 
     return NextResponse.json(
